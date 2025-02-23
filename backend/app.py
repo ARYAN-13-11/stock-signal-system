@@ -325,4 +325,7 @@ def get_candlestick_data(symbol):
         return jsonify({"error": "API Error. Try again later."}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))  # Default to 5000 if PORT is not set
+    app.run(host="0.0.0.0", port=port, debug=True)
+
+
