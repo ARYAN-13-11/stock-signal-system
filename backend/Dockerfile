@@ -1,7 +1,7 @@
-# Use Python 3.10 base image
+# Use Python image
 FROM python:3.10
 
-# Set working directory in container
+# Set working directory
 WORKDIR /app
 
 # Install system dependencies
@@ -10,25 +10,20 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     libatlas-base-dev \
     wget \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# Download & install TA-Lib from source
-RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
-    tar -xzf ta-lib-0.4.0-src.tar.gz && \
-    cd ta-lib && \
-    ./configure --prefix=/usr && \
-    make && \
-    make install && \
-    cd .. && rm -rf ta-lib ta-lib-0.4.0-src.tar.gz
-
-# Copy project files into container
+# Copy all files to container
 COPY . /app
 
-# Install Python dependencies (make sure no Windows .whl for TA-Lib)
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose Flask port
+# Expose the port Flask runs on
 EXPOSE 5000
 
-# Use Gunicorn for production
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
+# Copy Supervisor config file
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Start Supervisor (which will start both app.py and data_fetch.py)
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
