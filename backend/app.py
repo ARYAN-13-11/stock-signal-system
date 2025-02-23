@@ -6,6 +6,8 @@ import requests
 import pandas as pd
 import time
 import yfinance as yf
+import threading
+import data_fetch 
 
 from flask import Flask, jsonify, request, session, g
 from flask_cors import CORS
@@ -80,9 +82,18 @@ init_db()
 # AUTHENTICATION & USER MANAGEMENT
 #####################################
 
+# ✅ Start fetching data in a background thread
+def start_data_fetcher():
+    fetch_thread = threading.Thread(target=data_fetch.fetch_realtime_quotes, daemon=True)
+    fetch_thread.start()
+    
 @app.route('/healthz', methods=['GET'])
 def health_check():
     return jsonify({"status": "ok"}), 200
+    
+@app.route('/')
+def home():
+    return jsonify({"message": "Stock Signal Backend Running"}), 200
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -326,6 +337,7 @@ def get_candlestick_data(symbol):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Use Render's port
+    start_data_fetcher()  # ✅ Auto-run stock fetching
     app.run(host="0.0.0.0", port=port, debug=False)
 
 
