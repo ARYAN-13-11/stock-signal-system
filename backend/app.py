@@ -22,7 +22,7 @@ app = Flask(__name__)
 # Enable CORS with credentials for React frontend
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:3000"}})
 
-# Polygon.io API Key (Replace with your API key)
+# Polygon.io API Key (Replace with your API key)    
 POLYGON_API_KEY = "28Nfu2UJbj_paH2ac0Gg6q0C8c23yM8M"
 
 # Cache to store API responses for rate limiting
@@ -79,6 +79,10 @@ init_db()
 #####################################
 # AUTHENTICATION & USER MANAGEMENT
 #####################################
+
+@app.route('/healthz', methods=['GET'])
+def health_check():
+    return jsonify({"status": "ok"}), 200
 
 @app.route("/signup", methods=["POST"])
 def signup():
